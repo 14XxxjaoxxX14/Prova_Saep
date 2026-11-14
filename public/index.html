@@ -126,7 +126,7 @@
         <div class="modal-body p-4 text-center">
           <p class="mb-0 fs-5 text-muted" id="modalGenericoText"></p>
         </div>
-        <div class="modal-footer justify-content-center border-0 pb-4">
+        <div class="modal-footer justify-content-center border-0 pb-4" id="modalGenericoFooter">
           <button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal" id="modalGenericoBtn">Entendido</button>
         </div>
       </div>
@@ -137,6 +137,7 @@
       document.getElementById('modalGenericoTitle').innerText = title;
       document.getElementById('modalGenericoText').innerText = text;
       const header = document.getElementById('modalGenericoHeader');
+      const footer = document.getElementById('modalGenericoFooter');
       
       header.className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-warning text-dark'));
       if(type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
@@ -145,9 +146,13 @@
       const modal = new bootstrap.Modal(document.getElementById('modalGenerico'));
       
       if(onConfirm) {
-        document.getElementById('modalGenericoBtn').onclick = () => { onConfirm(); modal.hide(); };
+        footer.innerHTML = `
+          <button type="button" class="btn btn-outline-secondary w-25 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-${type === 'warning' ? 'warning' : 'danger'} w-25 fw-bold" id="modalConfirmBtn">Confirmar</button>
+        `;
+        document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); modal.hide(); };
       } else {
-        document.getElementById('modalGenericoBtn').onclick = null;
+        footer.innerHTML = `<button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal" id="modalGenericoBtn">Entendido</button>`;
       }
       
       modal.show();
@@ -163,7 +168,7 @@
     async function loadColab() {
       const r = await fetch('/api/colaboradores', {headers:h}).then(res=>res.json());
       document.getElementById('tbColab').innerHTML = r.map(c=>`<tr><td>${c.nome}</td><td>${c.cpf}</td><td>${c.matricula}</td><td>${c.setor}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="delColab(${c.id})">Deletar</button></td></tr>`).join('');
+      <td><button class="btn btn-sm btn-danger" onclick="confirmDeleteColab(${c.id}, '${c.nome}')">Deletar</button></td></tr>`).join('');
     }
 
     document.getElementById('fColab').onsubmit = async(e) => {
@@ -204,29 +209,35 @@
       document.getElementById('fColab').reset();
     };
 
-    async function delColab(id) { 
-      await fetch(`/api/colaboradores/${id}`, {method:'DELETE', headers:h}); 
-      loadColab(); 
+    function confirmDeleteColab(id, nome) {
+      showModal('Atenção!', `Tem certeza que deseja deletar o colaborador "${nome}"? Esta ação não pode ser desfeita.`, 'error', async () => {
+        await fetch(`/api/colaboradores/${id}`, {method:'DELETE', headers:h}); 
+        loadColab(); 
+      });
     }
 
     // Materiais
     async function loadMat() {
       const r = await fetch('/api/materiais', {headers:h}).then(res=>res.json());
       document.getElementById('tbMat').innerHTML = r.map(m=>`<tr><td>${m.codigo_barras}</td><td>${m.nome}</td><td>${m.quantidade_estoque}</td><td>R$ ${m.preco_unitario}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="delMat(${m.id})">Deletar</button></td></tr>`).join('');
+      <td><button class="btn btn-sm btn-danger" onclick="confirmDeleteMat(${m.id}, '${m.nome}')">Deletar</button></td></tr>`).join('');
     }
+    
     document.getElementById('fMat').onsubmit = async(e) => {
       e.preventDefault();
       await fetch('/api/materiais', {method:'POST', headers:h, body:JSON.stringify({nome:document.getElementById('mNome').value, codigo_barras:document.getElementById('mCod').value, categoria:document.getElementById('mCat').value, quantidade_estoque:document.getElementById('mQtd').value, preco_unitario:document.getElementById('mPreco').value})});
       loadMat(); document.getElementById('fMat').reset();
       showModal('Sucesso', 'Material cadastrado com sucesso!', 'success');
     };
-    async function delMat(id) { 
-      const res = await fetch(`/api/materiais/${id}`, {method:'DELETE', headers:h}); 
-      if(!res.ok) {
-        showModal('Aviso', 'Não é possível deletar este material pois ele possui histórico de movimentação.', 'warning');
-      }
-      loadMat(); 
+
+    function confirmDeleteMat(id, nome) {
+      showModal('Atenção!', `Tem certeza que deseja deletar o material "${nome}"?`, 'error', async () => {
+        const res = await fetch(`/api/materiais/${id}`, {method:'DELETE', headers:h}); 
+        if(!res.ok) {
+          showModal('Aviso', 'Não é possível deletar este material pois ele possui histórico de movimentação.', 'warning');
+        }
+        loadMat(); 
+      });
     }
 
     // Requisicoes (Internas)
@@ -236,12 +247,19 @@
       <td>${req.usuario_nome}</td><td>${req.material_nome}</td><td>${req.quantidade}</td><td>${req.obra_destino}</td><td>${req.motivo}</td>
       <td>
         <button class="btn btn-sm btn-success" onclick="procReq(${req.id}, 'APROVADA')">Aprovar</button>
-        <button class="btn btn-sm btn-danger" onclick="procReq(${req.id}, 'REJEITADA')">Rejeitar</button>
+        <button class="btn btn-sm btn-danger" onclick="confirmRejectReq(${req.id}, '${req.material_nome}', '${req.usuario_nome}')">Rejeitar</button>
       </td></tr>`).join('');
     }
+    
     async function procReq(id, status) {
       await fetch(`/api/requisicoes/${id}/processar`, {method:'PUT', headers:h, body:JSON.stringify({status})});
       loadReq(); loadMat();
+    }
+    
+    function confirmRejectReq(id, material, usuario) {
+       showModal('Rejeitar Requisição', `Tem certeza que deseja REJEITAR a requisição de ${material} feita por ${usuario}?`, 'warning', async () => {
+         await procReq(id, 'REJEITADA');
+       });
     }
 
     // Reservas (Clientes)
