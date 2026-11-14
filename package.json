@@ -1,10 +1,11 @@
 {
   "name": "sgmc",
   "version": "1.0.0",
-  "description": "Sistema de Gerenciamento de Materiais de Construção (SGMC)",
+  "description": "Sistema de Gerenciamento de Pets",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
