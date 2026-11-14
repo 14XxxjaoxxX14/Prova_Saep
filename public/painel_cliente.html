@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><title>SGMC - Minhas Reservas (Cliente)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    if(!user || user.perfil !== 'CLIENTE') window.location.href = 'login.html';
+  </script>
+</head>
+<body class="bg-light p-4">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <h3>Loja SGMC - Bem-vindo, <span id="uName"></span></h3>
+      <button class="btn btn-outline-danger" onclick="sessionStorage.clear(); window.location.href='login.html'">Sair</button>
+    </div>
+    
+    <div class="alert alert-info shadow-sm">
+      <strong>Como funciona:</strong> Faça a reserva dos produtos abaixo. Eles ficarão reservados para si no nosso sistema por apenas <strong>24 horas</strong>. Passe na nossa loja presencialmente para efetuar o pagamento e retirar os produtos!
+    </div>
+
+    <div class="row">
+      <div class="col-md-5">
+        <div class="card p-3 shadow-sm border-0">
+          <h5 class="fw-bold">Realizar Reserva</h5>
+          <hr>
+          <form id="fReserva">
+            <label class="form-label text-muted">Produto Disponível:</label>
+            <select id="rMat" class="form-select mb-3" required></select>
+            
+            <label class="form-label text-muted">Quantidade Desejada:</label>
+            <input type="number" id="rQtd" class="form-control mb-3" min="1" placeholder="Ex: 2" required>
+            
+            <button class="btn btn-dark w-100 fw-bold py-2" type="submit">Reservar para Retirada</button>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="card p-3 shadow-sm border-0">
+          <h5 class="fw-bold">Histórico de Reservas</h5>
+          <hr>
+          <table class="table">
+            <thead class="table-light"><tr><th>Produto</th><th>Qtd</th><th>Preço Un.</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody id="tbMinhasReservas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Modal Generico para Alertas do Sistema -->
+  <div class="modal fade" id="modalGenerico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header text-white" id="modalGenericoHeader">
+          <h5 class="modal-title fw-bold" id="modalGenericoTitle">Aviso</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+          <p class="mb-0 fs-5 text-muted" id="modalGenericoText"></p>
+        </div>
+        <div class="modal-footer justify-content-center border-0 pb-4">
+          <button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal" id="modalGenericoBtn">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    function showModal(title, text, type='success', onConfirm=null) {
+      document.getElementById('modalGenericoTitle').innerText = title;
+      document.getElementById('modalGenericoText').innerText = text;
+      const header = document.getElementById('modalGenericoHeader');
+      
+      header.className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-warning text-dark'));
+      if(type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
+      else header.querySelector('.btn-close').classList.add('btn-close-white');
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalGenerico'));
+      
+      if(onConfirm) {
+        document.getElementById('modalGenericoBtn').onclick = () => { onConfirm(); modal.hide(); };
+      } else {
+        document.getElementById('modalGenericoBtn').onclick = null;
+      }
+      
+      modal.show();
+    }
+  </script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('uName').innerText = user.nome;
+    const h = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 'Content-Type': 'application/json' };
+    
+    async function loadData() {
+      const mats = await fetch('/api/materiais', {headers:h}).then(res=>res.json());
+      document.getElementById('rMat').innerHTML = '<option value="" disabled selected>Escolha o Produto...</option>' + 
+        mats.map(m=>`<option value="${m.id}">${m.nome} | Estoque: ${m.quantidade_estoque} | R$ ${m.preco_unitario}</option>`).join('');
+      
+      const reservas = await fetch(`/api/reservas/usuario/${user.id}`, {headers:h}).then(res=>res.json());
+      document.getElementById('tbMinhasReservas').innerHTML = reservas.map(r=>{
+        let badge = 'bg-warning text-dark';
+        if(r.status==='RETIRADA') badge = 'bg-success text-white';
+        if(r.status==='CANCELADA') badge = 'bg-danger text-white';
+        const total = (r.quantidade * r.preco_unitario).toFixed(2);
+
+        return `<tr>
+          <td class="fw-semibold">${r.material_nome}</td>
+          <td>${r.quantidade}</td>
+          <td>R$ ${r.preco_unitario}</td>
+          <td class="fw-bold text-success">R$ ${total}</td>
+          <td><span class="badge ${badge}">${r.status}</span></td>
+        </tr>`;
+      }).join('');
+    }
+
+    document.getElementById('fReserva').onsubmit = async(e) => {
+      e.preventDefault();
+      const res = await fetch('/api/reservas', {
+        method:'POST', headers:h,
+        body: JSON.stringify({
+          usuario_id: user.id, 
+          material_id: document.getElementById('rMat').value,
+          quantidade: document.getElementById('rQtd').value
+        })
+      });
+      if(res.ok) {
+        showModal('Reserva Confirmada!', 'A sua reserva foi concluída. Ela expira em 24h. Por favor, passe na loja para efetuar a retirada e pagamento.', 'success');
+        document.getElementById('fReserva').reset(); 
+        loadData();
+      } else {
+        const err = await res.json();
+        showModal('Não foi possível reservar', err.error, 'error');
+      }
+    };
+    
+    loadData();
+  </script>
+</body></html>

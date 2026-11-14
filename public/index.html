@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><title>SGMC - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    if(!user || user.perfil !== 'MASTER') window.location.href = 'login.html';
+  </script>
+</head>
+<body>
+  <div class="d-flex vh-100">
+    <aside class="bg-dark text-white p-3" style="width:250px;">
+      <h4 class="text-warning text-center fw-bold">SGMC</h4>
+      <hr>
+      <ul class="nav nav-pills flex-column" role="tablist">
+        <li class="nav-item mb-1"><button class="nav-link active text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#colab">Colaboradores</button></li>
+        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#mat">Materiais</button></li>
+        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#req">Req. Internas</button></li>
+        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#reservas">Reservas (Clientes)</button></li>
+      </ul>
+      <button class="btn btn-outline-danger w-100 mt-auto" onclick="sessionStorage.clear(); window.location.href='login.html'">Sair</button>
+    </aside>
+    
+    <main class="w-100 p-4 bg-light overflow-auto">
+      <div class="tab-content">
+        <!-- Colaboradores -->
+        <div class="tab-pane fade show active" id="colab">
+          <h5>Colaboradores <small class="text-muted">(A senha gerada é o CPF do colaborador)</small></h5>
+          <form id="fColab" class="row g-2 mb-4">
+            <div class="col-md-3"><input type="text" id="cNome" class="form-control" placeholder="Nome" required></div>
+            <div class="col-md-3">
+              <input type="text" id="cCpf" class="form-control" placeholder="CPF (Apenas Nros)" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '')" required>
+            </div>
+            <div class="col-md-2"><input type="text" id="cMat" class="form-control" placeholder="Matrícula" required></div>
+            <div class="col-md-2"><input type="text" id="cSetor" class="form-control" placeholder="Setor" required></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Adicionar</button></div>
+          </form>
+          <table class="table table-bordered bg-white">
+            <thead class="table-dark"><tr><th>Nome</th><th>CPF</th><th>Matrícula</th><th>Setor</th><th>Ações</th></tr></thead>
+            <tbody id="tbColab"></tbody>
+          </table>
+        </div>
+        
+        <!-- Materiais -->
+        <div class="tab-pane fade" id="mat">
+          <h5>Materiais e Preços</h5>
+          <form id="fMat" class="row g-2 mb-4">
+            <div class="col-md-3"><input type="text" id="mNome" class="form-control" placeholder="Nome" required></div>
+            <div class="col-md-2"><input type="text" id="mCod" class="form-control" placeholder="Cód. Barras" required></div>
+            <div class="col-md-2"><input type="text" id="mCat" class="form-control" placeholder="Categoria" required></div>
+            <div class="col-md-2"><input type="number" id="mQtd" class="form-control" placeholder="Estoque Inicial" required></div>
+            <div class="col-md-2"><input type="number" step="0.01" id="mPreco" class="form-control" placeholder="Preço (R$)" required></div>
+            <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">+</button></div>
+          </form>
+          <table class="table table-bordered bg-white">
+            <thead class="table-dark"><tr><th>Cód</th><th>Nome</th><th>Estoque</th><th>Preço</th><th>Ações</th></tr></thead>
+            <tbody id="tbMat"></tbody>
+          </table>
+        </div>
+
+        <!-- Requisições Internas -->
+        <div class="tab-pane fade" id="req">
+          <h5>Requisições Internas (Colaboradores)</h5>
+          <table class="table table-bordered bg-white">
+            <thead class="table-dark"><tr><th>Usuário</th><th>Material</th><th>Qtd</th><th>Obra</th><th>Motivo</th><th>Ações</th></tr></thead>
+            <tbody id="tbReq"></tbody>
+          </table>
+        </div>
+
+        <!-- Reservas de Clientes -->
+        <div class="tab-pane fade" id="reservas">
+          <h5>Reservas em Loja (Clientes) <small class="text-muted">(Expiram em 24h)</small></h5>
+          <table class="table table-bordered bg-white">
+            <thead class="table-dark"><tr><th>Cliente (Email)</th><th>Material</th><th>Qtd</th><th>Data da Reserva</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbReservas"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Modal Estilizado de Credenciais do Colaborador -->
+  <div class="modal fade" id="modalCredenciais" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title fw-bold">Colaborador Cadastrado com Sucesso!</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+          <p class="text-muted mb-4">Por favor, partilhe as credenciais abaixo com o novo colaborador para que ele possa aceder ao sistema.</p>
+          
+          <div class="bg-light p-3 rounded border text-start mb-3">
+            <div class="mb-2">
+              <small class="text-muted text-uppercase fw-bold">E-mail de Acesso:</small>
+              <div class="fs-5 text-dark" id="modalColabEmail"></div>
+            </div>
+            <div>
+              <small class="text-muted text-uppercase fw-bold">Senha Provisória:</small>
+              <div class="fs-5 text-dark" id="modalColabSenha"></div>
+            </div>
+          </div>
+
+          <button id="btnCopiarCredenciais" class="btn btn-outline-success w-100 fw-bold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-2" viewBox="0 0 16 16">
+              <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+              <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+            </svg>
+            Copiar Credenciais
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Modal Generico para Alertas do Sistema -->
+  <div class="modal fade" id="modalGenerico" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header text-white" id="modalGenericoHeader">
+          <h5 class="modal-title fw-bold" id="modalGenericoTitle">Aviso</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+          <p class="mb-0 fs-5 text-muted" id="modalGenericoText"></p>
+        </div>
+        <div class="modal-footer justify-content-center border-0 pb-4">
+          <button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal" id="modalGenericoBtn">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    function showModal(title, text, type='success', onConfirm=null) {
+      document.getElementById('modalGenericoTitle').innerText = title;
+      document.getElementById('modalGenericoText').innerText = text;
+      const header = document.getElementById('modalGenericoHeader');
+      
+      header.className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-warning text-dark'));
+      if(type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
+      else header.querySelector('.btn-close').classList.add('btn-close-white');
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalGenerico'));
+      
+      if(onConfirm) {
+        document.getElementById('modalGenericoBtn').onclick = () => { onConfirm(); modal.hide(); };
+      } else {
+        document.getElementById('modalGenericoBtn').onclick = null;
+      }
+      
+      modal.show();
+    }
+  </script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const h = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 'Content-Type': 'application/json' };
+    
+    // Colaboradores
+    async function loadColab() {
+      const r = await fetch('/api/colaboradores', {headers:h}).then(res=>res.json());
+      document.getElementById('tbColab').innerHTML = r.map(c=>`<tr><td>${c.nome}</td><td>${c.cpf}</td><td>${c.matricula}</td><td>${c.setor}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="delColab(${c.id})">Deletar</button></td></tr>`).join('');
+    }
+
+    document.getElementById('fColab').onsubmit = async(e) => {
+      e.preventDefault();
+      const res = await fetch('/api/colaboradores', {
+        method:'POST', headers:h, 
+        body:JSON.stringify({
+          nome:document.getElementById('cNome').value, 
+          cpf:document.getElementById('cCpf').value, 
+          matricula:document.getElementById('cMat').value, 
+          setor:document.getElementById('cSetor').value, 
+          cargo:'-'
+        })
+      });
+      const data = await res.json();
+      
+      if(res.ok) {
+        document.getElementById('modalColabEmail').innerText = data.email;
+        document.getElementById('modalColabSenha').innerText = data.senha;
+        new bootstrap.Modal(document.getElementById('modalCredenciais')).show();
+
+        document.getElementById('btnCopiarCredenciais').onclick = () => {
+          const textoParaCopiar = `E-mail: ${data.email}\nSenha: ${data.senha}`;
+          navigator.clipboard.writeText(textoParaCopiar).then(() => {
+            const btn = document.getElementById('btnCopiarCredenciais');
+            btn.innerHTML = 'Copiado!';
+            btn.classList.replace('btn-outline-success', 'btn-success');
+            setTimeout(() => {
+              btn.innerHTML = 'Copiar Credenciais';
+              btn.classList.replace('btn-success', 'btn-outline-success');
+            }, 3000);
+          });
+        };
+      } else {
+        showModal('Erro', "Erro ao criar colaborador: " + data.error, 'error');
+      }
+      loadColab(); 
+      document.getElementById('fColab').reset();
+    };
+
+    async function delColab(id) { 
+      await fetch(`/api/colaboradores/${id}`, {method:'DELETE', headers:h}); 
+      loadColab(); 
+    }
+
+    // Materiais
+    async function loadMat() {
+      const r = await fetch('/api/materiais', {headers:h}).then(res=>res.json());
+      document.getElementById('tbMat').innerHTML = r.map(m=>`<tr><td>${m.codigo_barras}</td><td>${m.nome}</td><td>${m.quantidade_estoque}</td><td>R$ ${m.preco_unitario}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="delMat(${m.id})">Deletar</button></td></tr>`).join('');
+    }
+    document.getElementById('fMat').onsubmit = async(e) => {
+      e.preventDefault();
+      await fetch('/api/materiais', {method:'POST', headers:h, body:JSON.stringify({nome:document.getElementById('mNome').value, codigo_barras:document.getElementById('mCod').value, categoria:document.getElementById('mCat').value, quantidade_estoque:document.getElementById('mQtd').value, preco_unitario:document.getElementById('mPreco').value})});
+      loadMat(); document.getElementById('fMat').reset();
+      showModal('Sucesso', 'Material cadastrado com sucesso!', 'success');
+    };
+    async function delMat(id) { 
+      const res = await fetch(`/api/materiais/${id}`, {method:'DELETE', headers:h}); 
+      if(!res.ok) {
+        showModal('Aviso', 'Não é possível deletar este material pois ele possui histórico de movimentação.', 'warning');
+      }
+      loadMat(); 
+    }
+
+    // Requisicoes (Internas)
+    async function loadReq() {
+      const r = await fetch('/api/requisicoes', {headers:h}).then(res=>res.json());
+      document.getElementById('tbReq').innerHTML = r.filter(x=>x.status==='PENDENTE').map(req=>`<tr>
+      <td>${req.usuario_nome}</td><td>${req.material_nome}</td><td>${req.quantidade}</td><td>${req.obra_destino}</td><td>${req.motivo}</td>
+      <td>
+        <button class="btn btn-sm btn-success" onclick="procReq(${req.id}, 'APROVADA')">Aprovar</button>
+        <button class="btn btn-sm btn-danger" onclick="procReq(${req.id}, 'REJEITADA')">Rejeitar</button>
+      </td></tr>`).join('');
+    }
+    async function procReq(id, status) {
+      await fetch(`/api/requisicoes/${id}/processar`, {method:'PUT', headers:h, body:JSON.stringify({status})});
+      loadReq(); loadMat();
+    }
+
+    // Reservas (Clientes)
+    async function loadReservas() {
+      const r = await fetch('/api/reservas', {headers:h}).then(res=>res.json());
+      document.getElementById('tbReservas').innerHTML = r.map(res=>`<tr>
+      <td>${res.cliente_nome} (${res.cliente_email})</td><td>${res.material_nome}</td><td>${res.quantidade}</td>
+      <td>${new Date(res.data_reserva).toLocaleString()}</td>
+      <td><span class="badge bg-${res.status==='ATIVA'?'warning':(res.status==='RETIRADA'?'success':'danger')}">${res.status}</span></td>
+      <td>
+        ${res.status === 'ATIVA' ? `<button class="btn btn-sm btn-primary" onclick="confirmarRetirada(${res.id})">Confirmar Retirada</button>` : '-'}
+      </td></tr>`).join('');
+    }
+    async function confirmarRetirada(id) {
+      const res = await fetch(`/api/reservas/${id}/confirmar`, {method:'PUT', headers:h});
+      if(res.ok) showModal('Sucesso', "Retirada na loja confirmada com sucesso!", 'success');
+      else showModal('Erro', "Erro ao confirmar retirada.", 'error');
+      loadReservas();
+    }
+
+    loadColab(); loadMat(); loadReq(); loadReservas();
+  </script>
+</body></html>

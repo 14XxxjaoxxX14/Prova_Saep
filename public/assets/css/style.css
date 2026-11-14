@@ -1,0 +1,5 @@
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
+#wrapper { min-height: 100vh; }
+.style-sidebar { width: 260px; min-width: 260px; }
+.style-sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); }
+.style-sidebar .nav-link.active { background-color: #ffc107 !important; color: #000 !important; font-weight: bold; }
