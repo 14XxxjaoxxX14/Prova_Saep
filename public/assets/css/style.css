@@ -1,5 +1,8 @@
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; }
 #wrapper { min-height: 100vh; }
-.style-sidebar { width: 260px; min-width: 260px; }
-.style-sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); }
-.style-sidebar .nav-link.active { background-color: #ffc107 !important; color: #000 !important; font-weight: bold; }
+.style-sidebar { width: 260px; min-width: 260px; background-color: #134e4a !important; }
+.style-sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.12); }
+.style-sidebar .nav-link.active { background-color: #2dd4bf !important; color: #0f172a !important; font-weight: bold; }
+.bg-petcare { background-color: #0f766e !important; color: #fff; }
+.btn-petcare { background-color: #0f766e; border-color: #0f766e; color: #fff; }
+.btn-petcare:hover { background-color: #115e59; border-color: #115e59; color: #fff; }
