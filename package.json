@@ -1,5 +1,5 @@
 {
-  "name": "sgmc",
+  "name": "petcare-sgp",
   "version": "1.0.0",
   "description": "Sistema de Gerenciamento de Pets",
   "main": "server.js",
