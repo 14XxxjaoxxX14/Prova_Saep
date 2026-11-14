@@ -1,141 +1,227 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8"><title>SGMC - Minhas Reservas (Cliente)</title>
+  <meta charset="UTF-8">
+  <title>PetCare - Área do Tutor</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
   <script>
     const user = JSON.parse(sessionStorage.getItem('user'));
-    if(!user || user.perfil !== 'CLIENTE') window.location.href = 'login.html';
+    if (!user || user.perfil !== 'TUTOR') window.location.href = 'login.html';
   </script>
 </head>
-<body class="bg-light p-4">
+<body class="p-4">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-      <h3>Loja SGMC - Bem-vindo, <span id="uName"></span></h3>
+      <h3>🐾 PetCare - Olá, <span id="uName"></span></h3>
       <button class="btn btn-outline-danger" onclick="sessionStorage.clear(); window.location.href='login.html'">Sair</button>
     </div>
-    
-    <div class="alert alert-info shadow-sm">
-      <strong>Como funciona:</strong> Faça a reserva dos produtos abaixo. Eles ficarão reservados para si no nosso sistema por apenas <strong>24 horas</strong>. Passe na nossa loja presencialmente para efetuar o pagamento e retirar os produtos!
-    </div>
 
-    <div class="row">
+
+    <div class="row g-4">
+      <!-- COLUNA ESQUERDA: MEUS PETS + AGENDAR -->
       <div class="col-md-5">
-        <div class="card p-3 shadow-sm border-0">
-          <h5 class="fw-bold">Realizar Reserva</h5>
+        <div class="card p-3 shadow-sm border-0 mb-4">
+          <h5 class="fw-bold">Cadastrar Meu Pet</h5>
           <hr>
-          <form id="fReserva">
-            <label class="form-label text-muted">Produto Disponível:</label>
-            <select id="rMat" class="form-select mb-3" required></select>
-            
-            <label class="form-label text-muted">Quantidade Desejada:</label>
-            <input type="number" id="rQtd" class="form-control mb-3" min="1" placeholder="Ex: 2" required>
-            
-            <button class="btn btn-dark w-100 fw-bold py-2" type="submit">Reservar para Retirada</button>
+          <form id="fMeuPet">
+            <input type="text" id="mpNome" class="form-control mb-2" placeholder="Nome do Pet" required>
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <select id="mpEspecie" class="form-select" required>
+                  <option value="CAO">Cão</option>
+                  <option value="GATO">Gato</option>
+                  <option value="AVE">Ave</option>
+                  <option value="ROEDOR">Roedor</option>
+                  <option value="OUTRO">Outro</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <select id="mpSexo" class="form-select" required>
+                  <option value="M">Macho</option>
+                  <option value="F">Fêmea</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-7">
+                <input type="text" id="mpRaca" class="form-control" placeholder="Raça (ex: SRD)">
+              </div>
+              <div class="col-5">
+                <input type="number" step="0.01" id="mpPeso" class="form-control" placeholder="Peso (kg)">
+              </div>
+            </div>
+            <button class="btn btn-petcare w-100 fw-bold" type="submit">Salvar Pet</button>
+          </form>
+        </div>
+
+
+        <div class="card p-3 shadow-sm border-0">
+          <h5 class="fw-bold">Agendar Atendimento</h5>
+          <hr>
+          <form id="fAgendar">
+            <label class="form-label text-muted small">Selecione o Pet:</label>
+            <select id="agPet" class="form-select mb-2" required></select>
+
+
+            <label class="form-label text-muted small">Veterinário:</label>
+            <select id="agVet" class="form-select mb-2" required></select>
+
+
+            <label class="form-label text-muted small">Tipo de Atendimento:</label>
+            <select id="agTipo" class="form-select mb-2" required>
+              <option value="CONSULTA">Consulta Clínica</option>
+              <option value="VACINA">Vacinação</option>
+              <option value="EXAME">Exame</option>
+              <option value="RETORNO">Retorno</option>
+            </select>
+
+
+            <label class="form-label text-muted small">Data e Horário:</label>
+            <input type="datetime-local" id="agData" class="form-control mb-2" required>
+
+
+            <textarea id="agObs" class="form-control mb-3" placeholder="Motivo ou sintomas (opcional)"></textarea>
+            <button class="btn btn-dark w-100 fw-bold" type="submit">Solicitar Agendamento</button>
           </form>
         </div>
       </div>
+
+
+      <!-- COLUNA DIREITA: LISTA DE PETS E HISTÓRICO DE CONSULTAS -->
       <div class="col-md-7">
+        <div class="card p-3 shadow-sm border-0 mb-4">
+          <h5 class="fw-bold">Meus Pets</h5>
+          <hr>
+          <table class="table table-sm">
+            <thead class="table-light"><tr><th>Nome</th><th>Espécie</th><th>Raça</th><th>Peso</th></tr></thead>
+            <tbody id="tbMeusPets"></tbody>
+          </table>
+        </div>
+
+
         <div class="card p-3 shadow-sm border-0">
-          <h5 class="fw-bold">Histórico de Reservas</h5>
+          <h5 class="fw-bold">Minhas Consultas</h5>
           <hr>
           <table class="table">
-            <thead class="table-light"><tr><th>Produto</th><th>Qtd</th><th>Preço Un.</th><th>Total</th><th>Status</th></tr></thead>
-            <tbody id="tbMinhasReservas"></tbody>
+            <thead class="table-light"><tr><th>Data</th><th>Pet</th><th>Veterinário</th><th>Tipo</th><th>Status</th></tr></thead>
+            <tbody id="tbMinhasConsultas"></tbody>
           </table>
         </div>
       </div>
     </div>
   </div>
 
-  
-  <!-- Modal Generico para Alertas do Sistema -->
+
+  <!-- Modal Genérico -->
   <div class="modal fade" id="modalGenerico" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header text-white" id="modalGenericoHeader">
           <h5 class="modal-title fw-bold" id="modalGenericoTitle">Aviso</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4 text-center">
           <p class="mb-0 fs-5 text-muted" id="modalGenericoText"></p>
         </div>
         <div class="modal-footer justify-content-center border-0 pb-4">
-          <button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal" id="modalGenericoBtn">Entendido</button>
+          <button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal">Entendido</button>
         </div>
       </div>
     </div>
   </div>
-  <script>
-    function showModal(title, text, type='success', onConfirm=null) {
-      document.getElementById('modalGenericoTitle').innerText = title;
-      document.getElementById('modalGenericoText').innerText = text;
-      const header = document.getElementById('modalGenericoHeader');
-      
-      header.className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-warning text-dark'));
-      if(type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
-      else header.querySelector('.btn-close').classList.add('btn-close-white');
-      
-      const modal = new bootstrap.Modal(document.getElementById('modalGenerico'));
-      
-      if(onConfirm) {
-        document.getElementById('modalGenericoBtn').onclick = () => { onConfirm(); modal.hide(); };
-      } else {
-        document.getElementById('modalGenericoBtn').onclick = null;
-      }
-      
-      modal.show();
-    }
-  </script>
 
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.getElementById('uName').innerText = user.nome;
     const h = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 'Content-Type': 'application/json' };
-    
-    async function loadData() {
-      const mats = await fetch('/api/materiais', {headers:h}).then(res=>res.json());
-      document.getElementById('rMat').innerHTML = '<option value="" disabled selected>Escolha o Produto...</option>' + 
-        mats.map(m=>`<option value="${m.id}">${m.nome} | Estoque: ${m.quantidade_estoque} | R$ ${m.preco_unitario}</option>`).join('');
-      
-      const reservas = await fetch(`/api/reservas/usuario/${user.id}`, {headers:h}).then(res=>res.json());
-      document.getElementById('tbMinhasReservas').innerHTML = reservas.map(r=>{
-        let badge = 'bg-warning text-dark';
-        if(r.status==='RETIRADA') badge = 'bg-success text-white';
-        if(r.status==='CANCELADA') badge = 'bg-danger text-white';
-        const total = (r.quantidade * r.preco_unitario).toFixed(2);
 
+
+    function showModal(title, text, type = 'success') {
+      document.getElementById('modalGenericoTitle').innerText = title;
+      document.getElementById('modalGenericoText').innerText = text;
+      document.getElementById('modalGenericoHeader').className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : 'bg-danger');
+      new bootstrap.Modal(document.getElementById('modalGenerico')).show();
+    }
+
+
+    async function loadData() {
+      // Meus Pets
+      const pets = await fetch(/api/pets/tutor/${user.tutor_id}, { headers: h }).then(res => res.json());
+      document.getElementById('tbMeusPets').innerHTML = pets.map(p => `
+        <tr><td class="fw-bold">${p.nome}</td><td>${p.especie}</td><td>${p.raca}</td><td>${p.peso_kg} kg</td></tr>
+      `).join('');
+
+
+      document.getElementById('agPet').innerHTML = '<option value="" disabled selected>Escolha seu pet...</option>' +
+        pets.map(p => <option value="${p.id}">${p.nome} (${p.especie})</option>).join('');
+
+
+      // Veterinários
+      const vets = await fetch('/api/veterinarios', { headers: h }).then(res => res.json());
+      document.getElementById('agVet').innerHTML = '<option value="" disabled selected>Escolha o veterinário...</option>' +
+        vets.filter(v => v.status === 'ATIVO').map(v => <option value="${v.id}">${v.nome} - ${v.especialidade}</option>).join('');
+
+
+      // Minhas Consultas
+      const consultas = await fetch(/api/consultas/tutor/${user.tutor_id}, { headers: h }).then(res => res.json());
+      document.getElementById('tbMinhasConsultas').innerHTML = consultas.map(c => {
+        const badge = c.status === 'CONCLUIDA' ? 'bg-success' : (c.status === 'CANCELADA' ? 'bg-danger' : 'bg-warning text-dark');
         return `<tr>
-          <td class="fw-semibold">${r.material_nome}</td>
-          <td>${r.quantidade}</td>
-          <td>R$ ${r.preco_unitario}</td>
-          <td class="fw-bold text-success">R$ ${total}</td>
-          <td><span class="badge ${badge}">${r.status}</span></td>
+          <td>${new Date(c.data_consulta).toLocaleString()}</td>
+          <td class="fw-bold">${c.pet_nome}</td>
+          <td>${c.veterinario_nome}</td>
+          <td>${c.tipo_atendimento}</td>
+          <td><span class="badge ${badge}">${c.status}</span></td>
         </tr>`;
       }).join('');
     }
 
-    document.getElementById('fReserva').onsubmit = async(e) => {
+
+    document.getElementById('fMeuPet').onsubmit = async (e) => {
       e.preventDefault();
-      const res = await fetch('/api/reservas', {
-        method:'POST', headers:h,
+      const res = await fetch('/api/pets', {
+        method: 'POST', headers: h,
         body: JSON.stringify({
-          usuario_id: user.id, 
-          material_id: document.getElementById('rMat').value,
-          quantidade: document.getElementById('rQtd').value
+          tutor_id: user.tutor_id,
+          nome: document.getElementById('mpNome').value,
+          especie: document.getElementById('mpEspecie').value,
+          sexo: document.getElementById('mpSexo').value,
+          raca: document.getElementById('mpRaca').value,
+          peso_kg: document.getElementById('mpPeso').value
         })
       });
-      if(res.ok) {
-        showModal('Reserva Confirmada!', 'A sua reserva foi concluída. Ela expira em 24h. Por favor, passe na loja para efetuar a retirada e pagamento.', 'success');
-        document.getElementById('fReserva').reset(); 
+      if (res.ok) {
+        showModal('Sucesso!', 'Seu pet foi cadastrado.', 'success');
+        document.getElementById('fMeuPet').reset();
         loadData();
-      } else {
-        const err = await res.json();
-        showModal('Não foi possível reservar', err.error, 'error');
       }
     };
-    
+
+
+    document.getElementById('fAgendar').onsubmit = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/consultas', {
+        method: 'POST', headers: h,
+        body: JSON.stringify({
+          pet_id: document.getElementById('agPet').value,
+          veterinario_id: document.getElementById('agVet').value,
+          usuario_id: user.id,
+          tipo_atendimento: document.getElementById('agTipo').value,
+          data_consulta: document.getElementById('agData').value,
+          observacoes: document.getElementById('agObs').value
+        })
+      });
+      if (res.ok) {
+        showModal('Agendado!', 'Sua consulta foi agendada com sucesso.', 'success');
+        document.getElementById('fAgendar').reset();
+        loadData();
+      }
+    };
+
+
     loadData();
   </script>
-</body></html>
+</body>
+</html>
