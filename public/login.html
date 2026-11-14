@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><title>SGMC - Login</title>
+  <meta charset="UTF-8">
+  <title>PetCare - Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-dark d-flex align-items-center justify-content-center vh-100">
-  
-  <div class="card p-4 shadow" style="width:400px;">
-    <h3 class="text-center text-warning fw-bold">SGMC</h3>
-    <p class="text-center text-muted small">Acesso ao Sistema</p>
+
+  <div class="card p-4 shadow" style="width:420px;">
+    <h3 class="text-center text-warning fw-bold">🐾 PetCare</h3>
+    <p class="text-center text-muted small">Sistema de Gerenciamento de Pets e Tutores</p>
     <div id="alerta" class="alert alert-danger d-none small text-center"></div>
     <form id="formLogin">
       <input type="email" id="usuario" class="form-control mb-3" placeholder="E-mail" required>
@@ -16,18 +18,18 @@
       <button class="btn btn-warning w-100 fw-bold" type="submit">Entrar</button>
       <hr>
       <div class="text-center">
-        <span class="small text-muted">Ainda não é cliente?</span>
+        <span class="small text-muted">É tutor e ainda não tem conta?</span>
         <button type="button" class="btn btn-outline-secondary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#modalCadastro">Cadastrar-se</button>
       </div>
     </form>
   </div>
 
-  <!-- MODAL DE CADASTRO (CLIENTE) -->
+  <!-- MODAL DE AUTO-CADASTRO (TUTOR) -->
   <div class="modal fade" id="modalCadastro" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-warning">
-          <h5 class="modal-title fw-bold text-dark">Cadastro de Cliente</h5>
+          <h5 class="modal-title fw-bold text-dark">Cadastro de Tutor</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -41,8 +43,16 @@
               <input type="text" id="cadCpf" class="form-control" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '')" required>
             </div>
             <div class="mb-3">
+              <label class="form-label">Telefone / WhatsApp</label>
+              <input type="text" id="cadTelefone" class="form-control" placeholder="(11) 99999-9999" required>
+            </div>
+            <div class="mb-3">
               <label class="form-label">E-mail</label>
               <input type="email" id="cadEmail" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Endereço (Opcional)</label>
+              <input type="text" id="cadEndereco" class="form-control" placeholder="Rua, número, bairro">
             </div>
             <button type="submit" class="btn btn-dark w-100">Confirmar Cadastro</button>
           </form>
@@ -56,13 +66,13 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header bg-success text-white">
-          <h5 class="modal-title fw-bold">Bem-vindo à SGMC!</h5>
+          <h5 class="modal-title fw-bold">Bem-vindo ao PetCare!</h5>
         </div>
         <div class="modal-body p-4 text-center">
           <h4 class="text-success mb-3">Cadastro Concluído</h4>
-          <p class="text-muted">A sua conta foi criada com sucesso.</p>
+          <p class="text-muted">Sua conta de Tutor foi criada com sucesso.</p>
           <div class="alert alert-warning text-dark text-start">
-            <strong>⚠️ Atenção:</strong> Para efetuar o login, a sua senha de acesso inicial é o seu <strong>próprio CPF</strong> (digitado apenas com os números).
+            <strong>⚠️ Atenção:</strong> Para efetuar o login, a sua senha de acesso inicial é o seu <strong>próprio CPF</strong> (apenas números).
           </div>
           <button type="button" class="btn btn-success w-100 fw-bold mt-2" onclick="window.location.reload()">Fazer Login Agora</button>
         </div>
@@ -70,8 +80,36 @@
     </div>
   </div>
 
-  
-  <!-- Modal Generico para Alertas do Sistema -->
+  <!-- Modal Setup Inicial (Primeiro Admin MASTER) -->
+  <div class="modal fade" id="modalSetupAdmin" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-dark text-warning">
+          <h5 class="modal-title fw-bold">⚙️ Configuração Inicial - Administrador</h5>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted small mb-3">Nenhum usuário Administrador (MASTER) foi encontrado. Cadastre o primeiro administrador do sistema para continuar.</p>
+          <form id="formSetupAdmin">
+            <div class="mb-3">
+              <label class="form-label">Nome Completo</label>
+              <input type="text" id="setupNome" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">E-mail de Acesso</label>
+              <input type="email" id="setupEmail" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Senha (mín. 6 caracteres)</label>
+              <input type="password" id="setupSenha" class="form-control" minlength="6" required>
+            </div>
+            <button type="submit" class="btn btn-warning w-100 fw-bold">Criar Administrador</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Genérico -->
   <div class="modal fade" id="modalGenerico" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
@@ -88,77 +126,109 @@
       </div>
     </div>
   </div>
-  <script>
-    function showModal(title, text, type='success', onConfirm=null) {
-      document.getElementById('modalGenericoTitle').innerText = title;
-      document.getElementById('modalGenericoText').innerText = text;
-      const header = document.getElementById('modalGenericoHeader');
-      
-      header.className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-warning text-dark'));
-      if(type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
-      else header.querySelector('.btn-close').classList.add('btn-close-white');
-      
-      const modal = new bootstrap.Modal(document.getElementById('modalGenerico'));
-      
-      if(onConfirm) {
-        document.getElementById('modalGenericoBtn').onclick = () => { onConfirm(); modal.hide(); };
-      } else {
-        document.getElementById('modalGenericoBtn').onclick = null;
-      }
-      
-      modal.show();
-    }
-  </script>
-
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    function showModal(title, text, type = 'success', onConfirm = null) {
+      document.getElementById('modalGenericoTitle').innerText = title;
+      document.getElementById('modalGenericoText').innerText = text;
+      const header = document.getElementById('modalGenericoHeader');
+
+      header.className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-warning text-dark'));
+      if (type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
+      else header.querySelector('.btn-close').classList.add('btn-close-white');
+
+      const modal = new bootstrap.Modal(document.getElementById('modalGenerico'));
+      document.getElementById('modalGenericoBtn').onclick = onConfirm ? () => { onConfirm(); modal.hide(); } : null;
+      modal.show();
+    }
+
+    // SETUP INICIAL (VERIFICA SE EXISTE MASTER)
+    (async function verificarSetup() {
+      try {
+        const res = await fetch('/api/setup/status');
+        const data = await res.json();
+        if (data.needsSetup) {
+          new bootstrap.Modal(document.getElementById('modalSetupAdmin')).show();
+        }
+      } catch (e) {
+        console.error('Erro ao verificar setup inicial:', e);
+      }
+    })();
+
+    document.getElementById('formSetupAdmin').onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('setupEmail').value;
+      const res = await fetch('/api/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: document.getElementById('setupNome').value,
+          email: email,
+          senha: document.getElementById('setupSenha').value
+        })
+      });
+      const dados = await res.json();
+      if (res.ok) {
+        bootstrap.Modal.getInstance(document.getElementById('modalSetupAdmin')).hide();
+        document.getElementById('usuario').value = email;
+        showModal('Sistema Configurado!', 'Administrador criado com sucesso. Faça login para acessar.', 'success');
+      } else {
+        showModal('Erro na Configuração', dados.error || 'Não foi possível criar o administrador.', 'error');
+      }
+    };
+
     // LOGIN
     document.getElementById('formLogin').onsubmit = async (e) => {
       e.preventDefault();
       const res = await fetch('/api/login', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({usuario: document.getElementById('usuario').value, senha: document.getElementById('senha').value})
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuario: document.getElementById('usuario').value,
+          senha: document.getElementById('senha').value
+        })
       });
       const dados = await res.json();
-      if(res.ok) {
+      if (res.ok) {
         sessionStorage.setItem('token', dados.token);
         sessionStorage.setItem('user', JSON.stringify(dados.user));
-        
-        if(dados.user.perfil === 'CLIENTE') window.location.href = 'painel_cliente.html';
-        else if(dados.user.perfil === 'COMUM') window.location.href = 'painel_comum.html';
+
+        if (dados.user.perfil === 'TUTOR') window.location.href = 'painel_cliente.html';
+        else if (dados.user.perfil === 'VETERINARIO' || dados.user.perfil === 'RECEPCIONISTA') window.location.href = 'painel_comum.html';
         else window.location.href = 'index.html';
       } else {
-        document.getElementById('alerta').textContent = dados.message;
+        document.getElementById('alerta').textContent = dados.message || 'Erro ao autenticar.';
         document.getElementById('alerta').classList.remove('d-none');
       }
     };
 
-    // CADASTRO
+    // AUTO-CADASTRO TUTOR
     document.getElementById('formCadastro').onsubmit = async (e) => {
       e.preventDefault();
       const cpf = document.getElementById('cadCpf').value;
-      if(cpf.length !== 11) return showModal('Aviso', 'O CPF deve conter exatos 11 números!', 'warning');
+      if (cpf.length !== 11) return showModal('Aviso', 'O CPF deve conter exatos 11 números!', 'warning');
 
-      const res = await fetch('/api/clientes/cadastro', {
-        method:'POST', headers:{'Content-Type':'application/json'},
+      const res = await fetch('/api/tutores/cadastro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nome: document.getElementById('cadNome').value,
           cpf: cpf,
-          email: document.getElementById('cadEmail').value
+          telefone: document.getElementById('cadTelefone').value,
+          email: document.getElementById('cadEmail').value,
+          endereco: document.getElementById('cadEndereco').value
         })
       });
-      
+
       const dados = await res.json();
-      if(res.ok) {
-        // Esconde o modal de cadastro e mostra o modal estilizado de sucesso
-        const modalCad = bootstrap.Modal.getInstance(document.getElementById('modalCadastro'));
-        modalCad.hide();
-        const modalSuc = new bootstrap.Modal(document.getElementById('modalCadastroSucesso'));
-        modalSuc.show();
+      if (res.ok) {
+        bootstrap.Modal.getInstance(document.getElementById('modalCadastro')).hide();
+        new bootstrap.Modal(document.getElementById('modalCadastroSucesso')).show();
       } else {
-        showModal('Erro no Cadastro', dados.error, 'error');
+        showModal('Erro no Cadastro', dados.error || 'Não foi possível concluir o cadastro.', 'error');
       }
     };
   </script>
-</body></html>
+</body>
+</html>

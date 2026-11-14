@@ -1,121 +1,177 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><title>SGMC - Admin</title>
+  <meta charset="UTF-8">
+  <title>PetCare - Painel Administrativo</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
   <script>
     const user = JSON.parse(sessionStorage.getItem('user'));
-    if(!user || user.perfil !== 'MASTER') window.location.href = 'login.html';
+    if (!user || user.perfil !== 'MASTER') window.location.href = 'login.html';
   </script>
 </head>
 <body>
   <div class="d-flex vh-100">
-    <aside class="bg-dark text-white p-3" style="width:250px;">
-      <h4 class="text-warning text-center fw-bold">SGMC</h4>
+    <aside class="bg-dark text-white p-3 d-flex flex-column style-sidebar">
+      <h4 class="text-warning text-center fw-bold">🐾 PetCare</h4>
+      <p class="text-center text-secondary small mb-2">Painel Master</p>
       <hr>
       <ul class="nav nav-pills flex-column" role="tablist">
-        <li class="nav-item mb-1"><button class="nav-link active text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#colab">Colaboradores</button></li>
-        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#mat">Materiais</button></li>
-        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#req">Req. Internas</button></li>
-        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#reservas">Reservas (Clientes)</button></li>
+        <li class="nav-item mb-1"><button class="nav-link active text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#vets">Veterinários</button></li>
+        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#tutores">Tutores</button></li>
+        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#pets">Pets</button></li>
+        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#consultas">Consultas</button></li>
+        <li class="nav-item mb-1"><button class="nav-link text-white w-100 text-start" data-bs-toggle="pill" data-bs-target="#usuarios">Usuários / Equipe</button></li>
       </ul>
       <button class="btn btn-outline-danger w-100 mt-auto" onclick="sessionStorage.clear(); window.location.href='login.html'">Sair</button>
     </aside>
-    
+
     <main class="w-100 p-4 bg-light overflow-auto">
       <div class="tab-content">
-        <!-- Colaboradores -->
-        <div class="tab-pane fade show active" id="colab">
-          <h5>Colaboradores <small class="text-muted">(A senha gerada é o CPF do colaborador)</small></h5>
-          <form id="fColab" class="row g-2 mb-4">
-            <div class="col-md-3"><input type="text" id="cNome" class="form-control" placeholder="Nome" required></div>
-            <div class="col-md-3">
-              <input type="text" id="cCpf" class="form-control" placeholder="CPF (Apenas Nros)" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '')" required>
-            </div>
-            <div class="col-md-2"><input type="text" id="cMat" class="form-control" placeholder="Matrícula" required></div>
-            <div class="col-md-2"><input type="text" id="cSetor" class="form-control" placeholder="Setor" required></div>
+        <!-- Veterinários -->
+        <div class="tab-pane fade show active" id="vets">
+          <h5>Veterinários <small class="text-muted">(Senha inicial gerada é o CPF)</small></h5>
+          <form id="fVet" class="row g-2 mb-4">
+            <div class="col-md-3"><input type="text" id="vNome" class="form-control" placeholder="Nome" required></div>
+            <div class="col-md-2"><input type="text" id="vCpf" class="form-control" placeholder="CPF (números)" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')" required></div>
+            <div class="col-md-2"><input type="text" id="vCrmv" class="form-control" placeholder="CRMV" required></div>
+            <div class="col-md-3"><input type="text" id="vEsp" class="form-control" placeholder="Especialidade" required></div>
             <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Adicionar</button></div>
           </form>
-          <table class="table table-bordered bg-white">
-            <thead class="table-dark"><tr><th>Nome</th><th>CPF</th><th>Matrícula</th><th>Setor</th><th>Ações</th></tr></thead>
-            <tbody id="tbColab"></tbody>
+          <table class="table table-bordered bg-white align-middle">
+            <thead class="table-dark"><tr><th>Nome</th><th>CPF</th><th>CRMV</th><th>Especialidade</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbVets"></tbody>
           </table>
         </div>
-        
-        <!-- Materiais -->
-        <div class="tab-pane fade" id="mat">
-          <h5>Materiais e Preços</h5>
-          <form id="fMat" class="row g-2 mb-4">
-            <div class="col-md-3"><input type="text" id="mNome" class="form-control" placeholder="Nome" required></div>
-            <div class="col-md-2"><input type="text" id="mCod" class="form-control" placeholder="Cód. Barras" required></div>
-            <div class="col-md-2"><input type="text" id="mCat" class="form-control" placeholder="Categoria" required></div>
-            <div class="col-md-2"><input type="number" id="mQtd" class="form-control" placeholder="Estoque Inicial" required></div>
-            <div class="col-md-2"><input type="number" step="0.01" id="mPreco" class="form-control" placeholder="Preço (R$)" required></div>
+
+        <!-- Tutores -->
+        <div class="tab-pane fade" id="tutores">
+          <h5>Tutores <small class="text-muted">(Senha inicial é o CPF)</small></h5>
+          <form id="fTutor" class="row g-2 mb-4">
+            <div class="col-md-3"><input type="text" id="tNome" class="form-control" placeholder="Nome completo" required></div>
+            <div class="col-md-2"><input type="text" id="tCpf" class="form-control" placeholder="CPF (11 dígitos)" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')" required></div>
+            <div class="col-md-2"><input type="text" id="tTel" class="form-control" placeholder="Telefone" required></div>
+            <div class="col-md-2"><input type="email" id="tEmail" class="form-control" placeholder="E-mail" required></div>
+            <div class="col-md-2"><input type="text" id="tEnd" class="form-control" placeholder="Endereço"></div>
             <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">+</button></div>
           </form>
-          <table class="table table-bordered bg-white">
-            <thead class="table-dark"><tr><th>Cód</th><th>Nome</th><th>Estoque</th><th>Preço</th><th>Ações</th></tr></thead>
-            <tbody id="tbMat"></tbody>
+          <table class="table table-bordered bg-white align-middle">
+            <thead class="table-dark"><tr><th>Nome</th><th>CPF</th><th>Telefone</th><th>E-mail</th><th>Endereço</th><th>Ações</th></tr></thead>
+            <tbody id="tbTutores"></tbody>
           </table>
         </div>
 
-        <!-- Requisições Internas -->
-        <div class="tab-pane fade" id="req">
-          <h5>Requisições Internas (Colaboradores)</h5>
-          <table class="table table-bordered bg-white">
-            <thead class="table-dark"><tr><th>Usuário</th><th>Material</th><th>Qtd</th><th>Obra</th><th>Motivo</th><th>Ações</th></tr></thead>
-            <tbody id="tbReq"></tbody>
+        <!-- Pets -->
+        <div class="tab-pane fade" id="pets">
+          <h5>Pets Cadastrados</h5>
+          <form id="fPet" class="row g-2 mb-4">
+            <div class="col-md-2">
+              <select id="pTutor" class="form-select" required></select>
+            </div>
+            <div class="col-md-2"><input type="text" id="pNome" class="form-control" placeholder="Nome do Pet" required></div>
+            <div class="col-md-2">
+              <select id="pEspecie" class="form-select" required>
+                <option value="CAO">Cão</option>
+                <option value="GATO">Gato</option>
+                <option value="AVE">Ave</option>
+                <option value="ROEDOR">Roedor</option>
+                <option value="OUTRO">Outro</option>
+              </select>
+            </div>
+            <div class="col-md-2"><input type="text" id="pRaca" class="form-control" placeholder="Raça (SRD)"></div>
+            <div class="col-md-1">
+              <select id="pSexo" class="form-select" required>
+                <option value="M">M</option>
+                <option value="F">F</option>
+              </select>
+            </div>
+            <div class="col-md-1"><input type="number" step="0.01" id="pPeso" class="form-control" placeholder="Kg"></div>
+            <div class="col-md-1"><input type="text" id="pChip" class="form-control" placeholder="Chip"></div>
+            <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">+</button></div>
+          </form>
+          <table class="table table-bordered bg-white align-middle">
+            <thead class="table-dark"><tr><th>Pet</th><th>Tutor</th><th>Espécie</th><th>Raça</th><th>Sexo</th><th>Peso</th><th>Microchip</th><th>Ações</th></tr></thead>
+            <tbody id="tbPets"></tbody>
           </table>
         </div>
 
-        <!-- Reservas de Clientes -->
-        <div class="tab-pane fade" id="reservas">
-          <h5>Reservas em Loja (Clientes) <small class="text-muted">(Expiram em 24h)</small></h5>
-          <table class="table table-bordered bg-white">
-            <thead class="table-dark"><tr><th>Cliente (Email)</th><th>Material</th><th>Qtd</th><th>Data da Reserva</th><th>Status</th><th>Ações</th></tr></thead>
-            <tbody id="tbReservas"></tbody>
+        <!-- Consultas -->
+        <div class="tab-pane fade" id="consultas">
+          <h5>Consultas e Atendimentos</h5>
+          <form id="fConsulta" class="row g-2 mb-4">
+            <div class="col-md-2"><select id="cPet" class="form-select" required></select></div>
+            <div class="col-md-2"><select id="cVet" class="form-select" required></select></div>
+            <div class="col-md-2"><input type="datetime-local" id="cData" class="form-control" required></div>
+            <div class="col-md-2">
+              <select id="cTipo" class="form-select" required>
+                <option value="CONSULTA">Consulta</option>
+                <option value="VACINA">Vacina</option>
+                <option value="EXAME">Exame</option>
+                <option value="CIRURGIA">Cirurgia</option>
+                <option value="RETORNO">Retorno</option>
+              </select>
+            </div>
+            <div class="col-md-1"><input type="number" step="0.01" id="cValor" class="form-control" placeholder="R$"></div>
+            <div class="col-md-2"><input type="text" id="cObs" class="form-control" placeholder="Observações"></div>
+            <div class="col-md-1"><button type="submit" class="btn btn-primary w-100">+</button></div>
+          </form>
+          <table class="table table-bordered bg-white align-middle">
+            <thead class="table-dark"><tr><th>Data</th><th>Pet (Tutor)</th><th>Veterinário</th><th>Tipo</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbConsultas"></tbody>
+          </table>
+        </div>
+
+        <!-- Usuários -->
+        <div class="tab-pane fade" id="usuarios">
+          <h5>Usuários do Sistema (Recepcionistas / Admins)</h5>
+          <form id="fUser" class="row g-2 mb-4">
+            <div class="col-md-3"><input type="text" id="uNome" class="form-control" placeholder="Nome" required></div>
+            <div class="col-md-3"><input type="email" id="uEmail" class="form-control" placeholder="E-mail" required></div>
+            <div class="col-md-2"><input type="password" id="uSenha" class="form-control" placeholder="Senha" required></div>
+            <div class="col-md-2">
+              <select id="uPerfil" class="form-select" required>
+                <option value="RECEPCIONISTA">RECEPCIONISTA</option>
+                <option value="MASTER">MASTER</option>
+              </select>
+            </div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Criar Usuário</button></div>
+          </form>
+          <table class="table table-bordered bg-white align-middle">
+            <thead class="table-dark"><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbUsers"></tbody>
           </table>
         </div>
       </div>
     </main>
   </div>
-  
-  <!-- Modal Estilizado de Credenciais do Colaborador -->
+
+  <!-- Modal Credenciais do Veterinário -->
   <div class="modal fade" id="modalCredenciais" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header bg-success text-white">
-          <h5 class="modal-title fw-bold">Colaborador Cadastrado com Sucesso!</h5>
+          <h5 class="modal-title fw-bold">Veterinário Cadastrado!</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4 text-center">
-          <p class="text-muted mb-4">Por favor, partilhe as credenciais abaixo com o novo colaborador para que ele possa aceder ao sistema.</p>
-          
+          <p class="text-muted mb-3">Compartilhe as credenciais abaixo com o veterinário:</p>
           <div class="bg-light p-3 rounded border text-start mb-3">
             <div class="mb-2">
               <small class="text-muted text-uppercase fw-bold">E-mail de Acesso:</small>
-              <div class="fs-5 text-dark" id="modalColabEmail"></div>
+              <div class="fs-5 text-dark" id="modalVetEmail"></div>
             </div>
             <div>
               <small class="text-muted text-uppercase fw-bold">Senha Provisória:</small>
-              <div class="fs-5 text-dark" id="modalColabSenha"></div>
+              <div class="fs-5 text-dark" id="modalVetSenha"></div>
             </div>
           </div>
-
-          <button id="btnCopiarCredenciais" class="btn btn-outline-success w-100 fw-bold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-2" viewBox="0 0 16 16">
-              <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-              <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-            </svg>
-            Copiar Credenciais
-          </button>
+          <button id="btnCopiarCredenciais" class="btn btn-outline-success w-100 fw-bold">Copiar Credenciais</button>
         </div>
       </div>
     </div>
   </div>
 
-  
-  <!-- Modal Generico para Alertas do Sistema -->
+  <!-- Modal Genérico -->
   <div class="modal fade" id="modalGenerico" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
@@ -127,159 +183,313 @@
           <p class="mb-0 fs-5 text-muted" id="modalGenericoText"></p>
         </div>
         <div class="modal-footer justify-content-center border-0 pb-4" id="modalGenericoFooter">
-          <button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal" id="modalGenericoBtn">Entendido</button>
+          <button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal">Entendido</button>
         </div>
       </div>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    function showModal(title, text, type='success', onConfirm=null) {
+    const h = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 'Content-Type': 'application/json' };
+
+    function showModal(title, text, type = 'success', onConfirm = null) {
       document.getElementById('modalGenericoTitle').innerText = title;
       document.getElementById('modalGenericoText').innerText = text;
       const header = document.getElementById('modalGenericoHeader');
       const footer = document.getElementById('modalGenericoFooter');
-      
+
       header.className = 'modal-header text-white ' + (type === 'success' ? 'bg-success' : (type === 'error' ? 'bg-danger' : 'bg-warning text-dark'));
-      if(type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
+      if (type === 'warning') header.querySelector('.btn-close').classList.remove('btn-close-white');
       else header.querySelector('.btn-close').classList.add('btn-close-white');
-      
+
       const modal = new bootstrap.Modal(document.getElementById('modalGenerico'));
-      
-      if(onConfirm) {
+      if (onConfirm) {
         footer.innerHTML = `
           <button type="button" class="btn btn-outline-secondary w-25 fw-bold" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-${type === 'warning' ? 'warning' : 'danger'} w-25 fw-bold" id="modalConfirmBtn">Confirmar</button>
         `;
         document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); modal.hide(); };
       } else {
-        footer.innerHTML = `<button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal" id="modalGenericoBtn">Entendido</button>`;
+        footer.innerHTML = '<button type="button" class="btn btn-secondary w-50 fw-bold" data-bs-dismiss="modal">Entendido</button>';
       }
-      
       modal.show();
     }
-  </script>
 
+    const statusBadge = {
+      AGENDADA: 'bg-warning text-dark',
+      EM_ANDAMENTO: 'bg-info text-dark',
+      CONCLUIDA: 'bg-success',
+      CANCELADA: 'bg-danger'
+    };
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const h = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 'Content-Type': 'application/json' };
-    
-    // Colaboradores
-    async function loadColab() {
-      const r = await fetch('/api/colaboradores', {headers:h}).then(res=>res.json());
-      document.getElementById('tbColab').innerHTML = r.map(c=>`<tr><td>${c.nome}</td><td>${c.cpf}</td><td>${c.matricula}</td><td>${c.setor}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="confirmDeleteColab(${c.id}, '${c.nome}')">Deletar</button></td></tr>`).join('');
+    // VETERINÁRIOS
+    async function loadVets() {
+      const vets = await fetch('/api/veterinarios', { headers: h }).then(r => r.json());
+      document.getElementById('tbVets').innerHTML = vets.map(v => `<tr>
+        <td>${v.nome}</td><td>${v.cpf}</td><td>${v.crmv}</td><td>${v.especialidade}</td>
+        <td><span class="badge ${v.status === 'ATIVO' ? 'bg-success' : 'bg-secondary'}">${v.status}</span></td>
+        <td>
+          <button class="btn btn-sm btn-outline-secondary me-1" onclick="toggleVetStatus(${v.id}, '${v.nome}', '${v.crmv}', '${v.especialidade}', '${v.status}')">${v.status === 'ATIVO' ? 'Inativar' : 'Ativar'}</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteVet(${v.id}, '${v.nome}')">Deletar</button>
+        </td>
+      </tr>`).join('');
+
+      document.getElementById('cVet').innerHTML = '<option value="" disabled selected>Veterinário...</option>' +
+        vets.filter(v => v.status === 'ATIVO').map(v => `<option value="${v.id}">${v.nome}</option>`).join('');
     }
 
-    document.getElementById('fColab').onsubmit = async(e) => {
+    document.getElementById('fVet').onsubmit = async (e) => {
       e.preventDefault();
-      const res = await fetch('/api/colaboradores', {
-        method:'POST', headers:h, 
-        body:JSON.stringify({
-          nome:document.getElementById('cNome').value, 
-          cpf:document.getElementById('cCpf').value, 
-          matricula:document.getElementById('cMat').value, 
-          setor:document.getElementById('cSetor').value, 
-          cargo:'-'
+      const res = await fetch('/api/veterinarios', {
+        method: 'POST',
+        headers: h,
+        body: JSON.stringify({
+          nome: document.getElementById('vNome').value,
+          cpf: document.getElementById('vCpf').value,
+          crmv: document.getElementById('vCrmv').value,
+          especialidade: document.getElementById('vEsp').value
         })
       });
       const data = await res.json();
-      
-      if(res.ok) {
-        document.getElementById('modalColabEmail').innerText = data.email;
-        document.getElementById('modalColabSenha').innerText = data.senha;
+      if (res.ok) {
+        document.getElementById('modalVetEmail').innerText = data.email;
+        document.getElementById('modalVetSenha').innerText = data.senha;
         new bootstrap.Modal(document.getElementById('modalCredenciais')).show();
-
         document.getElementById('btnCopiarCredenciais').onclick = () => {
-          const textoParaCopiar = `E-mail: ${data.email}\nSenha: ${data.senha}`;
-          navigator.clipboard.writeText(textoParaCopiar).then(() => {
-            const btn = document.getElementById('btnCopiarCredenciais');
-            btn.innerHTML = 'Copiado!';
-            btn.classList.replace('btn-outline-success', 'btn-success');
-            setTimeout(() => {
-              btn.innerHTML = 'Copiar Credenciais';
-              btn.classList.replace('btn-success', 'btn-outline-success');
-            }, 3000);
-          });
+          navigator.clipboard.writeText(`E-mail: ${data.email}\nSenha: ${data.senha}`);
         };
+        document.getElementById('fVet').reset();
       } else {
-        showModal('Erro', "Erro ao criar colaborador: " + data.error, 'error');
+        showModal('Erro', data.error || 'Erro ao criar veterinário.', 'error');
       }
-      loadColab(); 
-      document.getElementById('fColab').reset();
+      loadVets();
     };
 
-    function confirmDeleteColab(id, nome) {
-      showModal('Atenção!', `Tem certeza que deseja deletar o colaborador "${nome}"? Esta ação não pode ser desfeita.`, 'error', async () => {
-        await fetch(`/api/colaboradores/${id}`, {method:'DELETE', headers:h}); 
-        loadColab(); 
+    async function toggleVetStatus(id, nome, crmv, especialidade, status) {
+      const novo = status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
+      await fetch(`/api/veterinarios/${id}`, {
+        method: 'PUT',
+        headers: h,
+        body: JSON.stringify({ nome, crmv, especialidade, status: novo })
       });
+      loadVets();
     }
 
-    // Materiais
-    async function loadMat() {
-      const r = await fetch('/api/materiais', {headers:h}).then(res=>res.json());
-      document.getElementById('tbMat').innerHTML = r.map(m=>`<tr><td>${m.codigo_barras}</td><td>${m.nome}</td><td>${m.quantidade_estoque}</td><td>R$ ${m.preco_unitario}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="confirmDeleteMat(${m.id}, '${m.nome}')">Deletar</button></td></tr>`).join('');
-    }
-    
-    document.getElementById('fMat').onsubmit = async(e) => {
-      e.preventDefault();
-      await fetch('/api/materiais', {method:'POST', headers:h, body:JSON.stringify({nome:document.getElementById('mNome').value, codigo_barras:document.getElementById('mCod').value, categoria:document.getElementById('mCat').value, quantidade_estoque:document.getElementById('mQtd').value, preco_unitario:document.getElementById('mPreco').value})});
-      loadMat(); document.getElementById('fMat').reset();
-      showModal('Sucesso', 'Material cadastrado com sucesso!', 'success');
-    };
-
-    function confirmDeleteMat(id, nome) {
-      showModal('Atenção!', `Tem certeza que deseja deletar o material "${nome}"?`, 'error', async () => {
-        const res = await fetch(`/api/materiais/${id}`, {method:'DELETE', headers:h}); 
-        if(!res.ok) {
-          showModal('Aviso', 'Não é possível deletar este material pois ele possui histórico de movimentação.', 'warning');
+    function deleteVet(id, nome) {
+      showModal('Excluir Veterinário', `Deseja remover "${nome}"?`, 'error', async () => {
+        const res = await fetch(`/api/veterinarios/${id}`, { method: 'DELETE', headers: h });
+        if (!res.ok) {
+          const err = await res.json();
+          showModal('Aviso', err.error, 'warning');
         }
-        loadMat(); 
+        loadVets();
       });
     }
 
-    // Requisicoes (Internas)
-    async function loadReq() {
-      const r = await fetch('/api/requisicoes', {headers:h}).then(res=>res.json());
-      document.getElementById('tbReq').innerHTML = r.filter(x=>x.status==='PENDENTE').map(req=>`<tr>
-      <td>${req.usuario_nome}</td><td>${req.material_nome}</td><td>${req.quantidade}</td><td>${req.obra_destino}</td><td>${req.motivo}</td>
-      <td>
-        <button class="btn btn-sm btn-success" onclick="procReq(${req.id}, 'APROVADA')">Aprovar</button>
-        <button class="btn btn-sm btn-danger" onclick="confirmRejectReq(${req.id}, '${req.material_nome}', '${req.usuario_nome}')">Rejeitar</button>
-      </td></tr>`).join('');
-    }
-    
-    async function procReq(id, status) {
-      await fetch(`/api/requisicoes/${id}/processar`, {method:'PUT', headers:h, body:JSON.stringify({status})});
-      loadReq(); loadMat();
-    }
-    
-    function confirmRejectReq(id, material, usuario) {
-       showModal('Rejeitar Requisição', `Tem certeza que deseja REJEITAR a requisição de ${material} feita por ${usuario}?`, 'warning', async () => {
-         await procReq(id, 'REJEITADA');
-       });
+    // TUTORES
+    async function loadTutores() {
+      const tutores = await fetch('/api/tutores', { headers: h }).then(r => r.json());
+      document.getElementById('tbTutores').innerHTML = tutores.map(t => `<tr>
+        <td>${t.nome}</td><td>${t.cpf}</td><td>${t.telefone}</td><td>${t.email}</td><td>${t.endereco || '-'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteTutor(${t.id}, '${t.nome}')">Deletar</button></td>
+      </tr>`).join('');
+
+      document.getElementById('pTutor').innerHTML = '<option value="" disabled selected>Tutor...</option>' +
+        tutores.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
     }
 
-    // Reservas (Clientes)
-    async function loadReservas() {
-      const r = await fetch('/api/reservas', {headers:h}).then(res=>res.json());
-      document.getElementById('tbReservas').innerHTML = r.map(res=>`<tr>
-      <td>${res.cliente_nome} (${res.cliente_email})</td><td>${res.material_nome}</td><td>${res.quantidade}</td>
-      <td>${new Date(res.data_reserva).toLocaleString()}</td>
-      <td><span class="badge bg-${res.status==='ATIVA'?'warning':(res.status==='RETIRADA'?'success':'danger')}">${res.status}</span></td>
-      <td>
-        ${res.status === 'ATIVA' ? `<button class="btn btn-sm btn-primary" onclick="confirmarRetirada(${res.id})">Confirmar Retirada</button>` : '-'}
-      </td></tr>`).join('');
-    }
-    async function confirmarRetirada(id) {
-      const res = await fetch(`/api/reservas/${id}/confirmar`, {method:'PUT', headers:h});
-      if(res.ok) showModal('Sucesso', "Retirada na loja confirmada com sucesso!", 'success');
-      else showModal('Erro', "Erro ao confirmar retirada.", 'error');
-      loadReservas();
+    document.getElementById('fTutor').onsubmit = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/tutores/cadastro', {
+        method: 'POST',
+        headers: h,
+        body: JSON.stringify({
+          nome: document.getElementById('tNome').value,
+          cpf: document.getElementById('tCpf').value,
+          telefone: document.getElementById('tTel').value,
+          email: document.getElementById('tEmail').value,
+          endereco: document.getElementById('tEnd').value
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showModal('Sucesso', 'Tutor cadastrado! Senha inicial = CPF.', 'success');
+        document.getElementById('fTutor').reset();
+        loadTutores();
+      } else {
+        showModal('Erro', data.error, 'error');
+      }
+    };
+
+    function deleteTutor(id, nome) {
+      showModal('Excluir Tutor', `Deseja remover "${nome}" e seus pets vinculados?`, 'error', async () => {
+        await fetch(`/api/tutores/${id}`, { method: 'DELETE', headers: h });
+        loadTutores();
+        loadPets();
+        loadConsultas();
+      });
     }
 
-    loadColab(); loadMat(); loadReq(); loadReservas();
+    // PETS
+    async function loadPets() {
+      const pets = await fetch('/api/pets', { headers: h }).then(r => r.json());
+      document.getElementById('tbPets').innerHTML = pets.map(p => `<tr>
+        <td>${p.nome}</td><td>${p.tutor_nome}</td><td>${p.especie}</td><td>${p.raca}</td><td>${p.sexo}</td>
+        <td>${Number(p.peso_kg).toFixed(2)} kg</td><td>${p.microchip || '-'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deletePet(${p.id}, '${p.nome}')">Deletar</button></td>
+      </tr>`).join('');
+
+      document.getElementById('cPet').innerHTML = '<option value="" disabled selected>Pet...</option>' +
+        pets.map(p => `<option value="${p.id}">${p.nome} (${p.tutor_nome})</option>`).join('');
+    }
+
+    document.getElementById('fPet').onsubmit = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/pets', {
+        method: 'POST',
+        headers: h,
+        body: JSON.stringify({
+          tutor_id: document.getElementById('pTutor').value,
+          nome: document.getElementById('pNome').value,
+          especie: document.getElementById('pEspecie').value,
+          raca: document.getElementById('pRaca').value || 'SRD',
+          sexo: document.getElementById('pSexo').value,
+          peso_kg: document.getElementById('pPeso').value || 0,
+          microchip: document.getElementById('pChip').value || null
+        })
+      });
+      if (res.ok) {
+        showModal('Sucesso', 'Pet cadastrado!', 'success');
+        document.getElementById('fPet').reset();
+        loadPets();
+      } else {
+        const err = await res.json();
+        showModal('Erro', err.error, 'error');
+      }
+    };
+
+    function deletePet(id, nome) {
+      showModal('Excluir Pet', `Deseja remover "${nome}"?`, 'error', async () => {
+        const res = await fetch(`/api/pets/${id}`, { method: 'DELETE', headers: h });
+        if (!res.ok) {
+          const err = await res.json();
+          showModal('Aviso', err.error, 'warning');
+        }
+        loadPets();
+        loadConsultas();
+      });
+    }
+
+    // CONSULTAS
+    async function loadConsultas() {
+      const list = await fetch('/api/consultas', { headers: h }).then(r => r.json());
+      document.getElementById('tbConsultas').innerHTML = list.map(c => `<tr>
+        <td>${new Date(c.data_consulta).toLocaleString('pt-BR')}</td>
+        <td>${c.pet_nome} <small class="text-muted">(${c.tutor_nome})</small></td>
+        <td>${c.veterinario_nome}</td>
+        <td>${c.tipo_atendimento}</td>
+        <td>R$ ${Number(c.valor || 0).toFixed(2)}</td>
+        <td><span class="badge ${statusBadge[c.status] || 'bg-secondary'}">${c.status}</span></td>
+        <td>
+          <div class="btn-group btn-group-sm">
+            ${c.status === 'AGENDADA' ? `<button class="btn btn-info" onclick="procConsulta(${c.id}, 'EM_ANDAMENTO')">Iniciar</button>` : ''}
+            ${c.status !== 'CONCLUIDA' && c.status !== 'CANCELADA' ? `<button class="btn btn-success" onclick="procConsulta(${c.id}, 'CONCLUIDA')">Concluir</button>` : ''}
+            ${c.status === 'AGENDADA' ? `<button class="btn btn-warning" onclick="procConsulta(${c.id}, 'CANCELADA')">Cancelar</button>` : ''}
+            <button class="btn btn-danger" onclick="deleteConsulta(${c.id})">Excluir</button>
+          </div>
+        </td>
+      </tr>`).join('');
+    }
+
+    document.getElementById('fConsulta').onsubmit = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/consultas', {
+        method: 'POST',
+        headers: h,
+        body: JSON.stringify({
+          pet_id: document.getElementById('cPet').value,
+          veterinario_id: document.getElementById('cVet').value,
+          data_consulta: document.getElementById('cData').value,
+          tipo_atendimento: document.getElementById('cTipo').value,
+          valor: document.getElementById('cValor').value || 0,
+          observacoes: document.getElementById('cObs').value
+        })
+      });
+      if (res.ok) {
+        showModal('Sucesso', 'Consulta agendada!', 'success');
+        document.getElementById('fConsulta').reset();
+        loadConsultas();
+      } else {
+        const err = await res.json();
+        showModal('Erro', err.error, 'error');
+      }
+    };
+
+    async function procConsulta(id, status) {
+      await fetch(`/api/consultas/${id}/processar`, {
+        method: 'PUT',
+        headers: h,
+        body: JSON.stringify({ status })
+      });
+      loadConsultas();
+    }
+
+    function deleteConsulta(id) {
+      showModal('Excluir Consulta', 'Deseja excluir este registro?', 'error', async () => {
+        await fetch(`/api/consultas/${id}`, { method: 'DELETE', headers: h });
+        loadConsultas();
+      });
+    }
+
+    // USUÁRIOS
+    async function loadUsers() {
+      const users = await fetch('/api/usuarios', { headers: h }).then(r => r.json());
+      document.getElementById('tbUsers').innerHTML = users.map(u => `<tr>
+        <td>${u.nome}</td><td>${u.email}</td><td><span class="badge bg-dark">${u.perfil}</span></td>
+        <td><span class="badge ${u.ativo ? 'bg-success' : 'bg-secondary'}">${u.ativo ? 'ATIVO' : 'INATIVO'}</span></td>
+        <td>
+          <button class="btn btn-sm btn-outline-secondary" onclick="toggleUser(${u.id}, ${u.ativo ? 0 : 1})">${u.ativo ? 'Desativar' : 'Ativar'}</button>
+        </td>
+      </tr>`).join('');
+    }
+
+    document.getElementById('fUser').onsubmit = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: h,
+        body: JSON.stringify({
+          nome: document.getElementById('uNome').value,
+          email: document.getElementById('uEmail').value,
+          senha: document.getElementById('uSenha').value,
+          perfil: document.getElementById('uPerfil').value
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showModal('Sucesso', 'Usuário criado!', 'success');
+        document.getElementById('fUser').reset();
+        loadUsers();
+      } else {
+        showModal('Erro', data.error, 'error');
+      }
+    };
+
+    async function toggleUser(id, ativo) {
+      await fetch(`/api/usuarios/${id}`, {
+        method: 'PUT',
+        headers: h,
+        body: JSON.stringify({ ativo })
+      });
+      loadUsers();
+    }
+
+    loadVets();
+    loadTutores();
+    loadPets();
+    loadConsultas();
+    loadUsers();
   </script>
-</body></html>
+</body>
+</html>
