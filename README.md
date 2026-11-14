@@ -1,4 +1,4 @@
-# 🏗️ SGMC - Sistema de Gerenciamento de Materiais de Construção
+# 🏗️ SGMC - Sistema de Gerenciamento de Pets
 
 ![Node.js](https://img.shields.io/badge/Node.js-v18+-green.svg)
 ![Express](https://img.shields.io/badge/Express-4.x-lightgrey.svg)
