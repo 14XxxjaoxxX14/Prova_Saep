@@ -4,6 +4,11 @@ node_modules/
 # Variáveis de ambiente
 .env
 
+# Banco de dados local SQLite
+*.sqlite*
+*.sqlite3
+*.db
+
 # Logs
 logs
 *.log

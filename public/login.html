@@ -50,6 +50,10 @@
               </div>
             </div>
             <div class="mb-3">
+              <label class="form-label">Telefone / WhatsApp</label>
+              <input type="text" id="cadTelefone" class="form-control" placeholder="(11) 99999-9999" required>
+            </div>
+            <div class="mb-3">
               <label class="form-label">E-mail</label>
               <input type="email" id="cadEmail" class="form-control" required>
             </div>
@@ -76,7 +80,7 @@
           <h4 class="text-success mb-3">Cadastro Concluído</h4>
           <p class="text-muted">A sua conta de tutor foi criada com sucesso.</p>
           <div class="alert alert-warning text-dark text-start">
-            <strong>⚠️ Atenção:</strong> Para efetuar o login, a sua senha de acesso inicial é o seu <strong>próprio CPF</strong> (digitado apenas com os números).
+            <strong>⚠️ Atenção:</strong> Para efetuar o login, a sua senha de acesso inicial é o seu <strong>próprio CPF</strong> (apenas números).
           </div>
           <button type="button" class="btn btn-success w-100 fw-bold mt-2" onclick="window.location.reload()">Fazer Login Agora</button>
         </div>
@@ -114,6 +118,40 @@
       new bootstrap.Modal(document.getElementById('modalGenerico')).show();
     }
 
+    // SETUP INICIAL (VERIFICA SE EXISTE MASTER)
+    (async function verificarSetup() {
+      try {
+        const res = await fetch('/api/setup/status');
+        const data = await res.json();
+        if (data.needsSetup) {
+          new bootstrap.Modal(document.getElementById('modalSetupAdmin')).show();
+        }
+      } catch (e) {
+        console.error('Erro ao verificar setup inicial:', e);
+      }
+    })();
+
+    document.getElementById('formSetupAdmin').onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('setupEmail').value;
+      const res = await fetch('/api/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: document.getElementById('setupNome').value,
+          email: email,
+          senha: document.getElementById('setupSenha').value
+        })
+      });
+      const dados = await res.json();
+      if (res.ok) {
+        bootstrap.Modal.getInstance(document.getElementById('modalSetupAdmin')).hide();
+        document.getElementById('usuario').value = email;
+        showModal('Sistema Configurado!', 'Administrador criado com sucesso. Faça login para acessar.', 'success');
+      } else {
+        showModal('Erro na Configuração', dados.error || 'Não foi possível criar o administrador.', 'error');
+      }
+    };
 
     // LOGIN
     document.getElementById('formLogin').onsubmit = async (e) => {
@@ -135,7 +173,7 @@
         else if (dados.user.perfil === 'VETERINARIO') window.location.href = 'painel_comum.html';
         else window.location.href = 'index.html'; // MASTER ou RECEPCIONISTA
       } else {
-        document.getElementById('alerta').textContent = dados.message;
+        document.getElementById('alerta').textContent = dados.message || 'Erro ao autenticar.';
         document.getElementById('alerta').classList.remove('d-none');
       }
     };
@@ -165,7 +203,7 @@
         bootstrap.Modal.getInstance(document.getElementById('modalCadastro')).hide();
         new bootstrap.Modal(document.getElementById('modalCadastroSucesso')).show();
       } else {
-        showModal('Erro no Cadastro', dados.error, 'error');
+        showModal('Erro no Cadastro', dados.error || 'Não foi possível concluir o cadastro.', 'error');
       }
     };
   </script>

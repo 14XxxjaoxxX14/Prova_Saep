@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>PetCare - Administração</title>
@@ -247,6 +247,12 @@
       modal.show();
     }
 
+    const statusBadge = {
+      AGENDADA: 'bg-warning text-dark',
+      EM_ANDAMENTO: 'bg-info text-dark',
+      CONCLUIDA: 'bg-success',
+      CANCELADA: 'bg-danger'
+    };
 
     // --- VETERINÁRIOS ---
     async function loadVets() {
@@ -297,6 +303,7 @@
         if (!res.ok) showModal('Aviso', 'Não é possível remover veterinário com consultas vinculadas.', 'warning');
         loadVets();
       });
+      loadVets();
     }
 
 

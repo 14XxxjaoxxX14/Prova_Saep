@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>PetCare - Área do Veterinário</title>
@@ -56,6 +56,25 @@
     </div>
   </div>
 
+    // MODO VETERINÁRIO
+    async function loadVetArea() {
+      const list = await fetch(`/api/consultas/veterinario/${user.veterinario_id}`, { headers: h }).then(r => r.json());
+      document.getElementById('tbAgendaVet').innerHTML = list.length
+        ? list.map(c => `<tr>
+            <td>${new Date(c.data_consulta).toLocaleString('pt-BR')}</td>
+            <td><strong>${c.pet_nome}</strong> <small class="text-muted">(${c.especie}, ${Number(c.peso_kg).toFixed(1)}kg)</small></td>
+            <td>${c.tutor_nome}<br><small class="text-muted">${c.tutor_telefone}</small></td>
+            <td>${c.tipo_atendimento}</td>
+            <td>${c.observacoes || '-'}</td>
+            <td>R$ ${Number(c.valor || 0).toFixed(2)}</td>
+            <td><span class="badge ${statusBadge[c.status] || 'bg-secondary'}">${c.status}</span></td>
+            <td>
+              ${c.status === 'AGENDADA' ? `<button class="btn btn-sm btn-info me-1" onclick="mudarStatus(${c.id}, 'EM_ANDAMENTO')">Iniciar</button>` : ''}
+              ${c.status !== 'CONCLUIDA' && c.status !== 'CANCELADA' ? `<button class="btn btn-sm btn-success" onclick="abrirFinalizar(${c.id}, '${(c.observacoes || '').replace(/'/g, "\\'")}', ${c.valor || 0})">Concluir</button>` : '-'}
+            </td>
+          </tr>`).join('')
+        : '<tr><td colspan="8" class="text-center text-muted">Nenhuma consulta na agenda.</td></tr>';
+    }
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
